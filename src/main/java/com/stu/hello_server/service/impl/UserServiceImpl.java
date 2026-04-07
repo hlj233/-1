@@ -15,40 +15,40 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    private UserMapper userMapper;
+    UserMapper userMapper;
 
     @Override
-    public Result<String> register(UserDTO userDTO) {
-        // 1. 校验用户是否已存在
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getUsername, userDTO.getUsername());
-        User existUser = userMapper.selectOne(queryWrapper);
-        if (existUser != null) {
+    public Result<String> register(UserDTO dto) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, dto.getUsername());
+        if (userMapper.selectOne(wrapper) != null) {
             return Result.error(ResultCode.USER_HAS_EXISTED);
         }
-        // 2. 转换DTO为Entity并插入数据库
+
         User user = new User();
-        user.setUsername(userDTO.getUsername());
-        user.setPassword(userDTO.getPassword());
+        user.setUsername(dto.getUsername());
+        user.setPassword(dto.getPassword());
         userMapper.insert(user);
         return Result.success("注册成功");
     }
 
     @Override
-    public Result<String> login(UserDTO userDTO) {
-        // 1. 校验用户是否存在
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getUsername, userDTO.getUsername());
-        User user = userMapper.selectOne(queryWrapper);
-        if (user == null) {
-            return Result.error(ResultCode.USER_NOT_EXIST);
-        }
-        // 2. 校验密码是否正确
-        if (!user.getPassword().equals(userDTO.getPassword())) {
-            return Result.error(ResultCode.PASSWORD_ERROR);
-        }
-        // 3. 生成Token（UUID模拟）
+    public Result<String> login(UserDTO dto) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, dto.getUsername());
+        User user = userMapper.selectOne(wrapper);
+
+        if (user == null) return Result.error(ResultCode.USER_NOT_EXIST);
+        if (!user.getPassword().equals(dto.getPassword())) return Result.error(ResultCode.PASSWORD_ERROR);
+
         String token = "Bearer " + UUID.randomUUID().toString().replace("-", "");
         return Result.success(token);
+    }
+
+    @Override
+    public Result<String> getUserById(Long id) {
+        User user = userMapper.selectById(id);
+        if (user == null) return Result.error(ResultCode.USER_NOT_EXIST);
+        return Result.success("ID:" + id + " 用户名:" + user.getUsername());
     }
 }
