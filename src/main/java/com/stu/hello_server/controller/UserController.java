@@ -27,4 +27,12 @@ public class UserController {
     public Result<String> get(@PathVariable Long id) {
         return userService.getUserById(id);
     }
+
+    // ====================== 任务6：分页接口 ======================
+    @GetMapping("/page")
+    public Result<Object> getUserPage(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "5") Integer pageSize) {
+        return userService.getUserPage(pageNum, pageSize);
+    }
 }
