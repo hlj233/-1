@@ -11,13 +11,13 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AuthInterceptor())
-                .addPathPatterns("/api/**")
+                .addPathPatterns("/**")
+                // 放行所有实验需要的接口
                 .excludePathPatterns(
                         "/api/users/login",
-                        "/api/users",
-                        "/api/users/*",
-                        // 放行分页接口
-                        "/api/users/page"
+                        "/api/users/register",
+                        "/api/users/*/detail",
+                        "/api/users/*"  // 重点：放行删除接口
                 );
     }
 }
