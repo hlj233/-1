@@ -10,6 +10,7 @@ import com.stu.hello_server.entity.User;
 import com.stu.hello_server.entity.UserInfo;
 import com.stu.hello_server.mapper.UserInfoMapper;
 import com.stu.hello_server.mapper.UserMapper;
+import com.stu.hello_server.security.JwtUtil;
 import com.stu.hello_server.service.UserService;
 import com.stu.hello_server.vo.UserDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -31,6 +31,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private JwtUtil jwtUtil;  // 注入JwtUtil
 
     private static final String CACHE_KEY_PREFIX = "user:detail:";
 
@@ -56,8 +59,10 @@ public class UserServiceImpl implements UserService {
         if (user == null) return Result.error(ResultCode.USER_NOT_EXIST);
         if (!user.getPassword().equals(dto.getPassword()))
             return Result.error(ResultCode.PASSWORD_ERROR);
-        String token = "Bearer " + UUID.randomUUID().toString().replace("-", "");
-        return Result.success(token);
+
+        // 使用JWT生成token
+        String jwt = jwtUtil.generateToken(dto.getUsername());
+        return Result.success(jwt);
     }
 
     @Override
