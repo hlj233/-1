@@ -21,7 +21,7 @@ import java.io.IOException;
 public class SecurityConfig {
 
     @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;  // 注入JWT过滤器
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,7 +31,6 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                // 配置未认证请求返回 401 而不是 403
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(new AuthenticationEntryPoint() {
                             @Override
@@ -44,12 +43,12 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()      // 注册
+                        .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll() // 登录
+                        .requestMatchers(HttpMethod.POST, "/api/chat").permitAll()       // 聊天接口放行 ← 添加这一行
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                // 添加JWT过滤器到UsernamePasswordAuthenticationFilter之前
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
