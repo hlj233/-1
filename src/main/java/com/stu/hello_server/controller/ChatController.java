@@ -18,8 +18,21 @@ public class ChatController {
 
     @PostMapping
     public Result<ChatResponseVO> chat(@RequestBody ChatRequestDTO requestDTO) {
-        String answer = chatService.chat(requestDTO.getMessage());
-        ChatResponseVO responseVO = new ChatResponseVO(requestDTO.getMessage(), answer);
-        return Result.success(responseVO);
+        try {
+            // 参数校验
+            if (requestDTO.getSessionId() == null || requestDTO.getSessionId().trim().isEmpty()) {
+                return Result.error(com.stu.hello_server.common.ResultCode.ERROR);
+            }
+            if (requestDTO.getMessage() == null || requestDTO.getMessage().trim().isEmpty()) {
+                return Result.error(com.stu.hello_server.common.ResultCode.ERROR);
+            }
+
+            ChatResponseVO responseVO = chatService.chat(requestDTO);
+            return Result.success(responseVO);
+        } catch (IllegalArgumentException e) {
+            return Result.error(com.stu.hello_server.common.ResultCode.ERROR);
+        } catch (Exception e) {
+            return Result.error(com.stu.hello_server.common.ResultCode.ERROR);
+        }
     }
 }
